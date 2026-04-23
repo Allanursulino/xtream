@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor de M3U para Xtream Codes</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9fafb;
+            color: #333;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            text-align: center;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+        }
+        h1 {
+            color: #0056b3;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        #conversionForm, #xtreamCodeResult {
+            text-align: left;
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .convert-button {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        pre {
+            background: #f4f6f8;
+            padding: 15px;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .share-icons {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .share-icons a {
+            margin: 0 8px;
+            text-decoration: none;
+            color: #0056b3;
+            font-size: 22px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Conversor de M3U para Xtream Codes</h1>
+        <div id="conversionForm">
+            <label for="m3uUrl">URL da Lista M3U:</label>
+            <input type="text" id="m3uUrl" name="m3uUrl" placeholder="Insira o link M3U aqui">
+            <div class="convert-button">
+                <button type="button" onclick="convert()">Converter</button>
+            </div>
+        </div>
+
+        <div id="xtreamCodeResult" style="display: none;">
+            <h6><strong>Dados do Xtream Codes:</strong></h6>
+            <pre id="xtreamCodeText"></pre>
+            <h6><strong>URL M3U Original:</strong></h6>
+            <pre id="m3uUrlText"></pre>
+            <div class="button-group">
+                <button type="button" onclick="copyResult()">COPIAR</button>
+                <button type="button" onclick="resetForm()">Converter Outra</button>
+            </div>
+            <div class="share-icons">
+                <a href="#" id="emailShare" title="Compartilhar por Email">📧</a>
+                <a href="#" id="whatsappShare" title="Compartilhar pelo WhatsApp">💬</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function convert() {
+            var m3uUrlInput = document.getElementById('m3uUrl').value.trim();
+
+            if (!m3uUrlInput) {
+                alert('Por favor, insira uma URL.');
+                return;
+            }
+
+            try {
+                // Analisa a URL de forma segura usando a API do navegador
+                var urlObj = new URL(m3uUrlInput);
+                var params = new URLSearchParams(urlObj.search);
+                
+                var extractedUsername = params.get('username') || 'Não encontrado';
+                var extractedPassword = params.get('password') || 'Não encontrado';
+                
+                // Extrai o protocolo (http/https) e o host (domínio + porta)
+                var extractedUrl = urlObj.protocol + '//' + urlObj.host;
+
+                // Gera o código Xtream
+                var xtreamCode = `**Nome da Lista**: Minha Lista\n**Usuário**: ${extractedUsername}\n**Senha**: ${extractedPassword}\n**URL**: ${extractedUrl}`;
+
+                // Exibe os resultados
+                document.getElementById('xtreamCodeText').textContent = xtreamCode;
+                document.getElementById('m3uUrlText').textContent = m3uUrlInput;
+                document.getElementById('conversionForm').style.display = 'none';
+                document.getElementById('xtreamCodeResult').style.display = 'block';
+
+                // Atualiza os links de compartilhamento
+                var encodedXtreamCode = encodeURIComponent(`${xtreamCode}\n\nURL M3U Original: ${m3uUrlInput}`);
+                document.getElementById('emailShare').href = `mailto:?subject=Dados Xtream Codes&body=${encodedXtreamCode}`;
+                document.getElementById('whatsappShare').href = `https://api.whatsapp.com/send?text=${encodedXtreamCode}`;
+            } catch (error) {
+                alert('Formato de URL M3U inválido. Certifique-se de incluir "http://" ou "https://". Tente novamente.');
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('conversionForm').style.display = 'block';
+            document.getElementById('xtreamCodeResult').style.display = 'none';
+            document.getElementById('m3uUrl').value = '';
+        }
+
+        function copyResult() {
+            var copyText = `${document.getElementById('xtreamCodeText').textContent}\nURL M3U: ${document.getElementById('m3uUrlText').textContent}`;
+            navigator.clipboard.writeText(copyText).then(() => {
+                alert('Resultado copiado para a área de transferência!');
+            }).catch(() => {
+                alert('Falha ao copiar. Tente selecionar o texto manualmente.');
+            });
+        }
+    </script>
+</body>
+</html>
